@@ -63,9 +63,9 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           if (showLogo) ...[
-            const Icon(Icons.grid_view_rounded, color: AppColors.accent, size: 20),
+            Image.asset('assets/icon/logo.png', width: 20, height: 20),
             const SizedBox(width: 8),
-            const Text('All-in-One', style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text('LOCORA Player', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(width: 12),
           ],
           Expanded(
@@ -118,10 +118,10 @@ class _Sidebar extends StatelessWidget {
               border: Border(bottom: BorderSide(color: AppColors.border)),
             ),
             child: Row(
-              children: const [
-                Icon(Icons.grid_view_rounded, color: AppColors.accent, size: 20),
-                SizedBox(width: 8),
-                Text('All-in-One', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+              children: [
+                Image.asset('assets/icon/logo.png', width: 20, height: 20),
+                const SizedBox(width: 8),
+                const Text('LOCORA Player', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
               ],
             ),
           ),
@@ -133,6 +133,7 @@ class _Sidebar extends StatelessWidget {
           ),
           const Divider(height: 1),
           _NavTile(item: kSettingsItem, selected: currentPath == kSettingsItem.path, onTap: () => onNavigate(kSettingsItem.path)),
+          _NavTile(item: kAboutItem, selected: currentPath == kAboutItem.path, onTap: () => onNavigate(kAboutItem.path)),
           const SizedBox(height: 8),
         ],
       ),
@@ -186,7 +187,7 @@ class _BottomNav extends StatelessWidget {
   const _BottomNav({required this.currentPath, required this.onNavigate});
 
   void _showMore(BuildContext context) {
-    final rest = [...kNavItems.skip(4), kSettingsItem];
+    final rest = [...kNavItems.skip(4), kSettingsItem, kAboutItem];
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.cardElevated,

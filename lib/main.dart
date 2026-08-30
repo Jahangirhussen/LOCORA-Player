@@ -44,7 +44,7 @@ class AllInOneApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => MusicPlayerController(),
       child: MaterialApp.router(
-        title: 'All-in-One',
+        title: 'LOCORA Player',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         darkTheme: AppTheme.dark,

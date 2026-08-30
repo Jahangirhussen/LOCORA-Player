@@ -333,20 +333,18 @@ class _FilesPageState extends State<FilesPage> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-          child: Row(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            runSpacing: 6,
             children: [
-              const Text('Files', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-              const SizedBox(width: 16),
-              ..._roots.map((r) => Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: ActionChip(
-                      label: Text(r.path, style: const TextStyle(fontSize: 12)),
-                      backgroundColor: _current?.path == r.path ? AppColors.accentMuted : AppColors.card,
-                      side: const BorderSide(color: AppColors.border),
-                      onPressed: () => _open(r),
-                    ),
+              const Padding(padding: EdgeInsets.only(right: 10), child: Text('Files', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700))),
+              ..._roots.map((r) => ActionChip(
+                    label: Text(r.path, style: const TextStyle(fontSize: 12)),
+                    backgroundColor: _current?.path == r.path ? AppColors.accentMuted : AppColors.card,
+                    side: const BorderSide(color: AppColors.border),
+                    onPressed: () => _open(r),
                   )),
-              const Spacer(),
               if (_selected.isNotEmpty) ...[
                 Text('${_selected.length} selected', style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
                 IconButton(icon: const Icon(Icons.delete_outline, size: 18), onPressed: () => _delete(_entries.where((e) => _selected.contains(e.path)).toList())),

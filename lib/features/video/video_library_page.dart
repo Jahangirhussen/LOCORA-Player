@@ -95,15 +95,16 @@ class _VideoLibraryPageState extends State<VideoLibraryPage> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-          child: Row(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            runSpacing: 6,
             children: [
-              const Text('Videos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-              const SizedBox(width: 16),
+              const Padding(padding: EdgeInsets.only(right: 10), child: Text('Videos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700))),
               _TabChip(label: 'All Videos', selected: _tab == _VideoTab.all, onTap: () => setState(() { _tab = _VideoTab.all; _folder = null; })),
               _TabChip(label: 'Folders', selected: _tab == _VideoTab.folders, onTap: () => setState(() { _tab = _VideoTab.folders; _folder = null; })),
               _TabChip(label: 'Recent', selected: _tab == _VideoTab.recent, onTap: () => setState(() { _tab = _VideoTab.recent; _folder = null; })),
               _TabChip(label: 'Favorites', selected: _tab == _VideoTab.favorites, onTap: () => setState(() { _tab = _VideoTab.favorites; _folder = null; })),
-              const Spacer(),
               IconButton(
                 tooltip: 'Rescan library',
                 icon: _scanning ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(LucideIcons.refreshCw, size: 18),

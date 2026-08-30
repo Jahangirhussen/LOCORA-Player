@@ -127,11 +127,7 @@ class _NotesPageState extends State<NotesPage> {
       return (nb['updated'] as String).compareTo(na['updated'] as String);
     });
 
-    return Row(
-      children: [
-        SizedBox(
-          width: 300,
-          child: Column(
+    final listPanel = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
@@ -197,54 +193,79 @@ class _NotesPageState extends State<NotesPage> {
                 ),
               ),
             ],
-          ),
-        ),
-        const VerticalDivider(width: 1),
-        Expanded(
-          child: _selectedKey == null || _showTrash
-              ? const Center(child: Text('Select or create a note', style: TextStyle(color: AppColors.textMuted)))
-              : Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _titleCtrl,
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                              decoration: const InputDecoration(border: InputBorder.none, hintText: 'Title'),
-                              onChanged: (_) => _save(),
-                            ),
-                          ),
-                          IconButton(icon: const Icon(Icons.push_pin_outlined), onPressed: () => _togglePin(_selectedKey!)),
-                        ],
-                      ),
-                      TextField(
-                        controller: _tagsCtrl,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                        decoration: const InputDecoration(border: InputBorder.none, hintText: 'Tags (comma separated)', isDense: true),
+          );
+
+    final editorPanel = _selectedKey == null || _showTrash
+        ? const Center(child: Text('Select or create a note', style: TextStyle(color: AppColors.textMuted)))
+        : Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _titleCtrl,
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                        decoration: const InputDecoration(border: InputBorder.none, hintText: 'Title'),
                         onChanged: (_) => _save(),
                       ),
-                      const SizedBox(height: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _bodyCtrl,
-                          maxLines: null,
-                          expands: true,
-                          textAlignVertical: TextAlignVertical.top,
-                          style: const TextStyle(fontSize: 14, height: 1.5),
-                          decoration: const InputDecoration(border: InputBorder.none, hintText: 'Start writing...'),
-                          onChanged: (_) => _save(),
-                        ),
-                      ),
-                    ],
+                    ),
+                    IconButton(icon: const Icon(Icons.push_pin_outlined), onPressed: () => _togglePin(_selectedKey!)),
+                  ],
+                ),
+                TextField(
+                  controller: _tagsCtrl,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  decoration: const InputDecoration(border: InputBorder.none, hintText: 'Tags (comma separated)', isDense: true),
+                  onChanged: (_) => _save(),
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _bodyCtrl,
+                    maxLines: null,
+                    expands: true,
+                    textAlignVertical: TextAlignVertical.top,
+                    style: const TextStyle(fontSize: 14, height: 1.5),
+                    decoration: const InputDecoration(border: InputBorder.none, hintText: 'Start writing...'),
+                    onChanged: (_) => _save(),
                   ),
                 ),
-        ),
-      ],
-    );
+              ],
+            ),
+          );
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final narrow = constraints.maxWidth < 700;
+      if (narrow) {
+        if (_selectedKey != null && !_showTrash) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Row(
+                  children: [
+                    IconButton(icon: const Icon(Icons.arrow_back, size: 18), onPressed: () => setState(() => _selectedKey = null)),
+                    const Text('Back to notes', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                  ],
+                ),
+              ),
+              Expanded(child: editorPanel),
+            ],
+          );
+        }
+        return listPanel;
+      }
+      return Row(
+        children: [
+          SizedBox(width: 300, child: listPanel),
+          const VerticalDivider(width: 1),
+          Expanded(child: editorPanel),
+        ],
+      );
+    });
   }
 
   String _relTime(String iso) {

@@ -107,12 +107,9 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
         ),
         Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: Padding(
+          child: LayoutBuilder(builder: (context, constraints) {
+            final narrow = constraints.maxWidth < 700;
+            final calendarGrid = Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     children: [
@@ -153,12 +150,11 @@ class _CalendarPageState extends State<CalendarPage> {
                       ),
                     ],
                   ),
-                ),
-              ),
-              SizedBox(
-                width: 260,
-                child: Column(
+                );
+
+            final eventList = Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: narrow ? MainAxisSize.min : MainAxisSize.max,
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(12),
@@ -169,8 +165,8 @@ class _CalendarPageState extends State<CalendarPage> {
                         ],
                       ),
                     ),
-                    Expanded(
-                      child: ListView(
+                    if (narrow)
+                      Column(
                         children: _eventsOn(_selectedDay)
                             .map((e) => ListTile(
                                   dense: true,
@@ -179,13 +175,40 @@ class _CalendarPageState extends State<CalendarPage> {
                                   trailing: IconButton(icon: const Icon(Icons.close, size: 14), onPressed: () => _deleteEvent(e['key'])),
                                 ))
                             .toList(),
+                      )
+                    else
+                      Expanded(
+                        child: ListView(
+                          children: _eventsOn(_selectedDay)
+                              .map((e) => ListTile(
+                                    dense: true,
+                                    title: Text(e['title'], style: const TextStyle(fontSize: 13)),
+                                    subtitle: (e['time'] as String).isNotEmpty ? Text(e['time'], style: const TextStyle(fontSize: 11, color: AppColors.textMuted)) : null,
+                                    trailing: IconButton(icon: const Icon(Icons.close, size: 14), onPressed: () => _deleteEvent(e['key'])),
+                                  ))
+                              .toList(),
+                        ),
                       ),
-                    ),
                   ],
-                ),
-              ),
-            ],
-          ),
+                );
+
+            if (narrow) {
+              return ListView(
+                children: [
+                  SizedBox(height: 380, child: calendarGrid),
+                  const Divider(height: 1),
+                  eventList,
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 3, child: calendarGrid),
+                SizedBox(width: 260, child: eventList),
+              ],
+            );
+          }),
         ),
       ],
     );

@@ -93,15 +93,16 @@ class _ImageLibraryPageState extends State<ImageLibraryPage> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-          child: Row(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            runSpacing: 6,
             children: [
-              const Text('Images', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-              const SizedBox(width: 16),
+              const Padding(padding: EdgeInsets.only(right: 10), child: Text('Images', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700))),
               _TabChip(label: 'All Images', selected: _tab == _Tab.all, onTap: () => setState(() { _tab = _Tab.all; _folder = null; })),
               _TabChip(label: 'Folders', selected: _tab == _Tab.folders, onTap: () => setState(() { _tab = _Tab.folders; _folder = null; })),
               _TabChip(label: 'Recent', selected: _tab == _Tab.recent, onTap: () => setState(() { _tab = _Tab.recent; _folder = null; })),
               _TabChip(label: 'Favorites', selected: _tab == _Tab.favorites, onTap: () => setState(() { _tab = _Tab.favorites; _folder = null; })),
-              const Spacer(),
               IconButton(
                 tooltip: 'Rescan library',
                 icon: _scanning ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(LucideIcons.refreshCw, size: 18),

@@ -73,7 +73,9 @@ class _CalculatorPageState extends State<CalculatorPage> {
           ),
         ),
         Expanded(
-          child: Row(
+          child: LayoutBuilder(builder: (context, constraints) {
+            final showHistory = constraints.maxWidth >= 700;
+            return Row(
             children: [
               Expanded(
                 flex: 3,
@@ -115,26 +117,28 @@ class _CalculatorPageState extends State<CalculatorPage> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: 220,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(padding: EdgeInsets.all(12), child: Text('History', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13))),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _history.length,
-                        itemBuilder: (context, i) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          child: Text(_history[i], style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              if (showHistory)
+                SizedBox(
+                  width: 220,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(padding: EdgeInsets.all(12), child: Text('History', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13))),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _history.length,
+                          itemBuilder: (context, i) => Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            child: Text(_history[i], style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
             ],
-          ),
+          );
+          }),
         ),
       ],
     );
