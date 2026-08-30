@@ -67,7 +67,7 @@ dependencies:
   photo_view: ^0.15.0
 
   # PDF rendering — pdfium-based, cross-platform (Win/Linux/macOS/Android/iOS/Web), MIT
-  pdfrx: ^1.1.20
+  pdfrx: ^2.5.0
 
   # World clock — offline IANA timezone database
   timezone: ^0.9.4
@@ -82,7 +82,7 @@ dependencies:
   web: ^1.1.1
 
   # Formatting helpers
-  intl: ^0.19.0
+  intl: ^0.20.3
   uuid: ^4.5.1
 
 dev_dependencies:
