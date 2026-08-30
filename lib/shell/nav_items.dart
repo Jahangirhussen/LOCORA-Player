@@ -24,6 +24,7 @@ const List<NavItem> kNavItems = [
   NavItem('Clock', LucideIcons.globe, '/clock'),
   NavItem('Calculator', LucideIcons.calculator, '/calculator'),
   NavItem('Favorites', LucideIcons.star, '/favorites'),
+  NavItem('Download', LucideIcons.download, '/download'),
 ];
 
 const NavItem kSettingsItem = NavItem('Settings', LucideIcons.settings, '/settings');

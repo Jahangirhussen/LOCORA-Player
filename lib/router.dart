@@ -16,6 +16,7 @@ import 'features/calendar/calendar_page.dart';
 import 'features/tools/timer_stopwatch_page.dart';
 import 'features/tools/calculator_page.dart';
 import 'features/about/about_page.dart';
+import 'features/download/download_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -46,6 +47,7 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/favorites', builder: (c, s) => const PlaceholderPage(title: 'Favorites', icon: LucideIcons.star)),
         GoRoute(path: '/settings', builder: (c, s) => const PlaceholderPage(title: 'Settings', icon: LucideIcons.settings)),
         GoRoute(path: '/about', builder: (c, s) => const AboutPage()),
+        GoRoute(path: '/download', builder: (c, s) => const DownloadPage()),
       ],
     ),
   ],
