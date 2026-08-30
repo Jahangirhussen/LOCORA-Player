@@ -37,6 +37,7 @@ class _FilesPageState extends State<FilesPage> {
 
   Future<void> _loadRoots() async {
     try {
+      await ensureStoragePermission();
       List<Directory> roots = [];
       if (Platform.isWindows) {
         for (var letter in 'CDEFGHIJ'.split('')) {

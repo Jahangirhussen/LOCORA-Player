@@ -5,7 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import 'pwa_install.dart';
 
-const String kReleasesUrl = 'https://github.com/Jahangirhussen/LOCORA-Player/releases/latest';
+const String kReleasesUrl = 'https://github.com/Jahangirhussen/LOCORA-Player/releases';
 
 enum _Os { windows, mac, android, ios, linux }
 
@@ -141,7 +141,7 @@ class _DownloadCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(AppTheme.radius),
-      onTap: () => launchUrl(Uri.parse(kReleasesUrl), webOnlyWindowName: '_blank'),
+      onTap: () => launchUrl(Uri.parse(kReleasesUrl), mode: LaunchMode.externalApplication),
       child: Container(
         width: 180,
         padding: const EdgeInsets.all(20),

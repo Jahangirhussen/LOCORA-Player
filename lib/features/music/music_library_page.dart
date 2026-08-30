@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -278,13 +279,23 @@ class _SongGrid extends StatelessWidget {
             children: [
               AspectRatio(
                 aspectRatio: 1,
-                child: Container(
-                  decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(AppTheme.radius), border: Border.all(color: AppColors.border)),
-                  child: Stack(
-                    children: [
-                      const Center(child: Icon(Icons.music_note, size: 30, color: AppColors.textMuted)),
-                      if (fav) const Positioned(top: 6, right: 6, child: Icon(Icons.favorite, size: 14, color: AppColors.accent)),
-                    ],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppTheme.radius),
+                  child: Container(
+                    decoration: BoxDecoration(color: AppColors.card, border: Border.all(color: AppColors.border)),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        FutureBuilder<Uint8List?>(
+                          future: MusicIndexService.coverArt(s.path),
+                          builder: (context, snap) {
+                            if (snap.data != null) return Image.memory(snap.data!, fit: BoxFit.cover);
+                            return const Center(child: Icon(Icons.music_note, size: 30, color: AppColors.textMuted));
+                          },
+                        ),
+                        if (fav) const Positioned(top: 6, right: 6, child: Icon(Icons.favorite, size: 14, color: AppColors.accent)),
+                      ],
+                    ),
                   ),
                 ),
               ),

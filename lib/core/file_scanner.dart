@@ -1,5 +1,19 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+/// Requests the storage/media permissions Android needs before touching
+/// the filesystem. No-op on other platforms (they don't gate access this
+/// way), and on web (which can't access the filesystem at all).
+Future<void> ensureStoragePermission() async {
+  if (kIsWeb || !Platform.isAndroid) return;
+  await [
+    Permission.videos,
+    Permission.photos,
+    Permission.audio,
+    Permission.storage,
+  ].request();
+}
 
 /// Generic offline filesystem scanner shared by Video/Music/Images/PDF
 /// indexers — one walk implementation, each feature just passes its own
@@ -15,6 +29,7 @@ const _skipNames = {r'$RECYCLE.BIN', 'System Volume Information', 'node_modules'
 
 Future<List<RawFileHit>> scanForExtensions(Set<String> extensions) async {
   if (kIsWeb) return [];
+  await ensureStoragePermission();
   final roots = <Directory>[];
   try {
     if (Platform.isWindows) {

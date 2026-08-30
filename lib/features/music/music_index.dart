@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import '../../core/file_scanner.dart';
@@ -52,6 +53,24 @@ class MusicIndexService {
     }
     await _box.put('entries', songs.map((e) => e.toJson()).toList());
     return songs;
+  }
+
+  static final Map<String, Uint8List?> _artCache = {};
+
+  /// Lazily reads embedded album art only when a song is actually displayed
+  /// (called from grid item builders), rather than during the bulk scan —
+  /// keeps the initial library scan fast.
+  static Future<Uint8List?> coverArt(String path) async {
+    if (_artCache.containsKey(path)) return _artCache[path];
+    try {
+      final tag = readMetadata(File(path), getImage: true);
+      final bytes = tag.pictures.isNotEmpty ? tag.pictures.first.bytes : null;
+      _artCache[path] = bytes;
+      return bytes;
+    } catch (_) {
+      _artCache[path] = null;
+      return null;
+    }
   }
 
   static bool isFavorite(String path) => stateBox.get('fav:$path', defaultValue: false);
