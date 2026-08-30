@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../features/music/mini_player.dart';
 import 'nav_items.dart';
 
 /// Persistent shell: sidebar (desktop) / bottom nav (mobile) + top bar.
@@ -34,6 +35,7 @@ class AppShell extends StatelessWidget {
                 children: [
                   _TopBar(showLogo: !isDesktop),
                   Expanded(child: child),
+                  const MiniPlayer(),
                 ],
               ),
             ),
