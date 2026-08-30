@@ -1,12 +1,12 @@
 {
-    "name": "all_in_one_app",
-    "short_name": "all_in_one_app",
+    "name": "LOCORA Player",
+    "short_name": "LOCORA",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "description": "Offline-first media, files, documents & productivity — one unified app.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

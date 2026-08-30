@@ -3,13 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import 'pwa_install.dart';
 
 const String kReleasesUrl = 'https://github.com/Jahangirhussen/LOCORA-Player/releases/latest';
 
 enum _Os { windows, mac, android, ios, linux }
 
-class DownloadPage extends StatelessWidget {
+class DownloadPage extends StatefulWidget {
   const DownloadPage({super.key});
+
+  @override
+  State<DownloadPage> createState() => _DownloadPageState();
+}
+
+class _DownloadPageState extends State<DownloadPage> {
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) PwaInstall.listen();
+  }
 
   _Os? _detectOs() {
     if (kIsWeb) {
@@ -64,6 +76,22 @@ class DownloadPage extends StatelessWidget {
           const SizedBox(height: 6),
           const Text('Runs 100% offline once installed. No account, no cloud.', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
           const SizedBox(height: 24),
+          if (kIsWeb)
+            ValueListenableBuilder<bool>(
+              valueListenable: PwaInstall.canInstall,
+              builder: (context, canInstall, _) {
+                if (!canInstall) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: ElevatedButton.icon(
+                    onPressed: PwaInstall.promptInstall,
+                    icon: const Icon(Icons.install_desktop, size: 18),
+                    label: const Text('Install App (offline, this device)'),
+                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14)),
+                  ),
+                );
+              },
+            ),
           if (detected != null) ...[
             Container(
               padding: const EdgeInsets.all(16),
@@ -83,6 +111,8 @@ class DownloadPage extends StatelessWidget {
             runSpacing: 16,
             children: _cards.map((c) => _DownloadCard(os: c.$1, icon: c.$2, label: c.$3, subtitle: c.$4, recommended: c.$1 == detected)).toList(),
           ),
+          const SizedBox(height: 12),
+          const Text('Native Windows/macOS/Android/Linux installers below aren\'t built yet — those cards link to GitHub Releases, which is currently empty.', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
           const SizedBox(height: 24),
           const Text('All builds come from the same open-source code — nothing is uploaded, nothing tracked.', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
         ],
