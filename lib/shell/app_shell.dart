@@ -185,9 +185,40 @@ class _BottomNav extends StatelessWidget {
   final void Function(String path) onNavigate;
   const _BottomNav({required this.currentPath, required this.onNavigate});
 
+  void _showMore(BuildContext context) {
+    final rest = [...kNavItems.skip(4), kSettingsItem];
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.cardElevated,
+      builder: (_) => SafeArea(
+        child: GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(16),
+          children: rest.map((item) {
+            return InkWell(
+              onTap: () {
+                Navigator.pop(context);
+                onNavigate(item.path);
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(item.icon, size: 22, color: currentPath == item.path ? AppColors.accent : AppColors.textSecondary),
+                  const SizedBox(height: 6),
+                  Text(item.label, style: const TextStyle(fontSize: 11), textAlign: TextAlign.center),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final items = [...kNavItems.take(5)];
+    final items = [...kNavItems.take(4)];
     return Container(
       height: 60,
       decoration: const BoxDecoration(
@@ -195,22 +226,37 @@ class _BottomNav extends StatelessWidget {
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: Row(
-        children: items.map((item) {
-          final selected = currentPath == item.path;
-          return Expanded(
+        children: [
+          ...items.map((item) {
+            final selected = currentPath == item.path;
+            return Expanded(
+              child: InkWell(
+                onTap: () => onNavigate(item.path),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(item.icon, size: 20, color: selected ? AppColors.accent : AppColors.textMuted),
+                    const SizedBox(height: 2),
+                    Text(item.label, style: TextStyle(fontSize: 10, color: selected ? AppColors.accent : AppColors.textMuted)),
+                  ],
+                ),
+              ),
+            );
+          }),
+          Expanded(
             child: InkWell(
-              onTap: () => onNavigate(item.path),
-              child: Column(
+              onTap: () => _showMore(context),
+              child: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(item.icon, size: 20, color: selected ? AppColors.accent : AppColors.textMuted),
-                  const SizedBox(height: 2),
-                  Text(item.label, style: TextStyle(fontSize: 10, color: selected ? AppColors.accent : AppColors.textMuted)),
+                  Icon(Icons.grid_view_rounded, size: 20, color: AppColors.textMuted),
+                  SizedBox(height: 2),
+                  Text('More', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
                 ],
               ),
             ),
-          );
-        }).toList(),
+          ),
+        ],
       ),
     );
   }

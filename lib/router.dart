@@ -11,6 +11,10 @@ import 'features/video/video_library_page.dart';
 import 'features/music/music_library_page.dart';
 import 'features/images/image_library_page.dart';
 import 'features/pdf/pdf_library_page.dart';
+import 'features/tasks/tasks_page.dart';
+import 'features/calendar/calendar_page.dart';
+import 'features/tools/timer_stopwatch_page.dart';
+import 'features/tools/calculator_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -34,6 +38,10 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/notes', builder: (c, s) => const NotesPage()),
         GoRoute(path: '/alarm', builder: (c, s) => const AlarmPage()),
         GoRoute(path: '/clock', builder: (c, s) => const WorldClockPage()),
+        GoRoute(path: '/tasks', builder: (c, s) => const TasksPage()),
+        GoRoute(path: '/calendar', builder: (c, s) => const CalendarPage()),
+        GoRoute(path: '/timer', builder: (c, s) => const TimerStopwatchPage()),
+        GoRoute(path: '/calculator', builder: (c, s) => const CalculatorPage()),
         GoRoute(path: '/favorites', builder: (c, s) => const PlaceholderPage(title: 'Favorites', icon: LucideIcons.star)),
         GoRoute(path: '/settings', builder: (c, s) => const PlaceholderPage(title: 'Settings', icon: LucideIcons.settings)),
       ],

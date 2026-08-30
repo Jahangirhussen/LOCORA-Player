@@ -17,8 +17,12 @@ const List<NavItem> kNavItems = [
   NavItem('PDF', LucideIcons.file, '/pdf'),
   NavItem('Files', LucideIcons.folder, '/files'),
   NavItem('Notes', LucideIcons.notebookPen, '/notes'),
+  NavItem('Tasks', LucideIcons.listChecks, '/tasks'),
+  NavItem('Calendar', LucideIcons.calendar, '/calendar'),
   NavItem('Alarm', LucideIcons.alarmClock, '/alarm'),
+  NavItem('Timer', LucideIcons.timer, '/timer'),
   NavItem('Clock', LucideIcons.globe, '/clock'),
+  NavItem('Calculator', LucideIcons.calculator, '/calculator'),
   NavItem('Favorites', LucideIcons.star, '/favorites'),
 ];
 
