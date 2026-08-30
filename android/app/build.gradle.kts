@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.realdealcanva.all_in_one_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
