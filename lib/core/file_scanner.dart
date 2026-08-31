@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'library_folders.dart';
 
 /// Requests the storage/media permissions Android needs before touching
 /// the filesystem. No-op on other platforms (they don't gate access this
@@ -36,6 +37,20 @@ const _skipNames = {r'$RECYCLE.BIN', 'System Volume Information', 'node_modules'
 Future<List<RawFileHit>> scanForExtensions(Set<String> extensions) async {
   if (kIsWeb) return [];
   await ensureStoragePermission();
+
+  // If the user has explicitly authorized specific folders (via the real
+  // native folder picker), scan only those — never fall back to a
+  // whole-drive scan once the user has made an explicit choice.
+  final authorized = await LibraryFoldersService.authorizedFolders();
+  if (authorized.isNotEmpty) {
+    final out = <RawFileHit>[];
+    for (final f in authorized) {
+      if (f.status != FolderAccessStatus.granted) continue;
+      await _walk(Directory(f.path), extensions, out, 0);
+    }
+    return out;
+  }
+
   final roots = <Directory>[];
   try {
     if (Platform.isWindows) {

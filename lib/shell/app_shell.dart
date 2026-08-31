@@ -133,6 +133,7 @@ class _Sidebar extends StatelessWidget {
           ),
           const Divider(height: 1),
           _NavTile(item: kSettingsItem, selected: currentPath == kSettingsItem.path, onTap: () => onNavigate(kSettingsItem.path)),
+          _NavTile(item: kStorageAccessItem, selected: currentPath == kStorageAccessItem.path, onTap: () => onNavigate(kStorageAccessItem.path)),
           _NavTile(item: kAboutItem, selected: currentPath == kAboutItem.path, onTap: () => onNavigate(kAboutItem.path)),
           const SizedBox(height: 8),
         ],
@@ -187,7 +188,7 @@ class _BottomNav extends StatelessWidget {
   const _BottomNav({required this.currentPath, required this.onNavigate});
 
   void _showMore(BuildContext context) {
-    final rest = [...kNavItems.skip(4), kSettingsItem, kAboutItem];
+    final rest = [...kNavItems.skip(4), kSettingsItem, kStorageAccessItem, kAboutItem];
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.cardElevated,

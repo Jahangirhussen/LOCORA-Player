@@ -29,3 +29,4 @@ const List<NavItem> kNavItems = [
 
 const NavItem kSettingsItem = NavItem('Settings', LucideIcons.settings, '/settings');
 const NavItem kAboutItem = NavItem('About', LucideIcons.info, '/about');
+const NavItem kStorageAccessItem = NavItem('Storage Access', LucideIcons.folderCog, '/storage-access');

@@ -17,6 +17,7 @@ import 'features/tools/timer_stopwatch_page.dart';
 import 'features/tools/calculator_page.dart';
 import 'features/about/about_page.dart';
 import 'features/download/download_page.dart';
+import 'features/storage_access/storage_access_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -48,6 +49,7 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/settings', builder: (c, s) => const PlaceholderPage(title: 'Settings', icon: LucideIcons.settings)),
         GoRoute(path: '/about', builder: (c, s) => const AboutPage()),
         GoRoute(path: '/download', builder: (c, s) => const DownloadPage()),
+        GoRoute(path: '/storage-access', builder: (c, s) => const StorageAccessPage()),
       ],
     ),
   ],

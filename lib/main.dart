@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'theme/app_theme.dart';
+import 'theme/app_colors.dart';
 import 'router.dart';
 import 'features/notes/notes_page.dart' show notesBoxName, notesTrashBoxName;
 import 'features/alarm/alarm_page.dart';
@@ -14,6 +15,8 @@ import 'features/pdf/pdf_index.dart';
 import 'features/files/files_index.dart';
 import 'features/tasks/tasks_page.dart' show tasksBoxName;
 import 'features/calendar/calendar_page.dart' show calendarBoxName;
+import 'core/library_folders.dart';
+import 'features/storage_access/storage_access_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,23 +36,36 @@ void main() async {
   await Hive.openBox(filesStateBox);
   await Hive.openBox(tasksBoxName);
   await Hive.openBox(calendarBoxName);
+  await Hive.openBox(libraryFoldersBox);
   runApp(const AllInOneApp());
 }
 
-class AllInOneApp extends StatelessWidget {
+class AllInOneApp extends StatefulWidget {
   const AllInOneApp({super.key});
+
+  @override
+  State<AllInOneApp> createState() => _AllInOneAppState();
+}
+
+class _AllInOneAppState extends State<AllInOneApp> {
+  late bool _onboarded = LibraryFoldersService.hasCompletedOnboarding;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => MusicPlayerController(),
-      child: MaterialApp.router(
+      child: MaterialApp(
         title: 'LOCORA Player',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         darkTheme: AppTheme.dark,
         themeMode: ThemeMode.dark,
-        routerConfig: appRouter,
+        home: _onboarded
+            ? Router.withConfig(config: appRouter)
+            : Scaffold(
+                backgroundColor: AppColors.background,
+                body: SafeArea(child: StorageAccessPage(onDone: () => setState(() => _onboarded = true))),
+              ),
       ),
     );
   }
