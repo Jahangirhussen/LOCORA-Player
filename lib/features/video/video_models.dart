@@ -1,3 +1,5 @@
+export '../../core/file_scanner.dart' show humanSize, humanDuration;
+
 class VideoEntry {
   final String path;
   final String name;
@@ -21,19 +23,4 @@ class VideoEntry {
         sizeBytes: j['sizeBytes'],
         modified: DateTime.parse(j['modified']),
       );
-}
-
-String humanSize(int bytes) {
-  if (bytes < 1024) return '$bytes B';
-  if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(0)} KB';
-  if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(0)} MB';
-  return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
-}
-
-String humanDuration(Duration d) {
-  final h = d.inHours;
-  final m = d.inMinutes % 60;
-  final s = d.inSeconds % 60;
-  if (h > 0) return '$h:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-  return '$m:${s.toString().padLeft(2, '0')}';
 }
