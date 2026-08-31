@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import 'video_index.dart';
 import 'video_models.dart';
 import 'video_player_page.dart';
+import 'video_player_controller.dart';
 
 enum _VideoTab { all, folders, recent, favorites }
 
@@ -81,9 +83,10 @@ class _VideoLibraryPageState extends State<VideoLibraryPage> {
     return list;
   }
 
-  void _open(VideoEntry v) {
-    VideoIndexService.recordPlayed(v.path);
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => VideoPlayerPage(entry: v)));
+  void _open(VideoEntry v) async {
+    await context.read<VideoPlayerController>().open(v);
+    if (!mounted) return;
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const VideoPlayerPage()));
   }
 
   @override

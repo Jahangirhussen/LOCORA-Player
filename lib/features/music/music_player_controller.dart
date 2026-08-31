@@ -16,6 +16,10 @@ class MusicPlayerController extends ChangeNotifier {
   MusicRepeatMode repeat = MusicRepeatMode.off;
   final List<int> _shuffleOrder = [];
 
+  /// Wired from main.dart once the video controller also exists — enforces
+  /// "only one media source plays at a time" without a circular import.
+  VoidCallback? pauseOtherMedia;
+
   SongEntry? get current => currentIndex >= 0 && currentIndex < queue.length ? queue[currentIndex] : null;
 
   MusicPlayerController() {
@@ -43,6 +47,7 @@ class MusicPlayerController extends ChangeNotifier {
   Future<void> _playCurrent() async {
     final song = current;
     if (song == null) return;
+    pauseOtherMedia?.call();
     await player.open(Media(song.path));
     MusicIndexService.recordPlayed(song.path);
     notifyListeners();

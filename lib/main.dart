@@ -10,6 +10,7 @@ import 'features/alarm/alarm_page.dart';
 import 'features/video/video_index.dart';
 import 'features/music/music_index.dart';
 import 'features/music/music_player_controller.dart';
+import 'features/video/video_player_controller.dart';
 import 'features/images/image_index.dart';
 import 'features/pdf/pdf_index.dart';
 import 'features/files/files_index.dart';
@@ -52,8 +53,20 @@ class _AllInOneAppState extends State<AllInOneApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => MusicPlayerController(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MusicPlayerController()),
+        ChangeNotifierProxyProvider<MusicPlayerController, VideoPlayerController>(
+          create: (context) => VideoPlayerController(music: context.read<MusicPlayerController>()),
+          update: (context, music, video) {
+            video ??= VideoPlayerController(music: music);
+            music.pauseOtherMedia = () {
+              if (video!.player.state.playing) video.player.pause();
+            };
+            return video;
+          },
+        ),
+      ],
       child: MaterialApp(
         title: 'LOCORA Player',
         debugShowCheckedModeBanner: false,

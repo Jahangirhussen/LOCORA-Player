@@ -1,52 +1,30 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
+import '../../core/file_scanner.dart';
 import 'video_index.dart';
-import 'video_models.dart';
+import 'video_player_controller.dart';
 
 const _speeds = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 
+/// Full-screen player UI — reads from the app-wide VideoPlayerController so
+/// closing this screen (back button) just minimizes to the mini player bar
+/// rather than stopping playback.
 class VideoPlayerPage extends StatefulWidget {
-  final VideoEntry entry;
-  const VideoPlayerPage({super.key, required this.entry});
+  const VideoPlayerPage({super.key});
 
   @override
   State<VideoPlayerPage> createState() => _VideoPlayerPageState();
 }
 
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
-  late final Player _player;
-  late final VideoController _controller;
   Timer? _hideTimer;
-  Timer? _saveTimer;
   bool _controlsVisible = true;
   double _speed = 1.0;
-  bool _fav = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _player = Player();
-    _controller = VideoController(_player);
-    _fav = VideoIndexService.isFavorite(widget.entry.path);
-    _open();
-    _resetHideTimer();
-    _saveTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      VideoIndexService.saveResumePosition(widget.entry.path, _player.state.position);
-    });
-  }
-
-  Future<void> _open() async {
-    await _player.open(Media(widget.entry.path));
-    final resume = VideoIndexService.resumePosition(widget.entry.path);
-    if (resume != null && resume.inSeconds > 3) {
-      await _player.seek(resume);
-    }
-  }
 
   void _resetHideTimer() {
     _hideTimer?.cancel();
@@ -57,17 +35,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _resetHideTimer();
+  }
+
+  @override
   void dispose() {
-    VideoIndexService.saveResumePosition(widget.entry.path, _player.state.position);
     _hideTimer?.cancel();
-    _saveTimer?.cancel();
-    _player.dispose();
     super.dispose();
   }
 
-  void _showInfo() {
-    final v = widget.entry;
-    final track = _player.state.track;
+  void _showInfo(VideoPlayerController ctrl) {
+    final v = ctrl.current;
+    if (v == null) return;
+    final track = ctrl.player.state.track;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -79,7 +61,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Size: ${humanSize(v.sizeBytes)}'),
-              Text('Duration: ${humanDuration(_player.state.duration)}'),
+              Text('Duration: ${humanDuration(ctrl.player.state.duration)}'),
               Text('Modified: ${v.modified}'),
               Text('Audio track: ${track.audio.title ?? track.audio.id}'),
               Text('Subtitle: ${track.subtitle.title ?? track.subtitle.id}'),
@@ -93,8 +75,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     );
   }
 
-  Future<void> _pickAudioTrack() async {
-    final tracks = _player.state.tracks.audio;
+  Future<void> _pickAudioTrack(VideoPlayerController ctrl) async {
+    final tracks = ctrl.player.state.tracks.audio;
     final picked = await showModalBottomSheet<AudioTrack>(
       context: context,
       backgroundColor: AppColors.cardElevated,
@@ -103,11 +85,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         children: tracks.map((t) => ListTile(title: Text(t.title ?? t.id), onTap: () => Navigator.pop(context, t))).toList(),
       ),
     );
-    if (picked != null) await _player.setAudioTrack(picked);
+    if (picked != null) await ctrl.player.setAudioTrack(picked);
   }
 
-  Future<void> _pickSubtitleTrack() async {
-    final tracks = _player.state.tracks.subtitle;
+  Future<void> _pickSubtitleTrack(VideoPlayerController ctrl) async {
+    final tracks = ctrl.player.state.tracks.subtitle;
     final picked = await showModalBottomSheet<SubtitleTrack>(
       context: context,
       backgroundColor: AppColors.cardElevated,
@@ -120,53 +102,80 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       ),
     );
     if (picked != null) {
-      await _player.setSubtitleTrack(picked);
+      await ctrl.player.setSubtitleTrack(picked);
     } else {
-      await _player.setSubtitleTrack(SubtitleTrack.no());
+      await ctrl.player.setSubtitleTrack(SubtitleTrack.no());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: MouseRegion(
-        onHover: (_) => _resetHideTimer(),
-        child: GestureDetector(
-          onTap: _resetHideTimer,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Video(controller: _controller, controls: NoVideoControls),
-              AnimatedOpacity(
-                opacity: _controlsVisible ? 1 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: IgnorePointer(
-                  ignoring: !_controlsVisible,
-                  child: _Controls(
-                    player: _player,
-                    title: widget.entry.name,
-                    fav: _fav,
-                    speed: _speed,
-                    onBack: () => Navigator.of(context).pop(),
-                    onInfo: _showInfo,
-                    onAudio: _pickAudioTrack,
-                    onSubtitle: _pickSubtitleTrack,
-                    onFav: () {
-                      VideoIndexService.toggleFavorite(widget.entry.path);
-                      setState(() => _fav = !_fav);
-                    },
-                    onSpeed: (s) {
-                      _player.setRate(s);
-                      setState(() => _speed = s);
-                    },
-                  ),
+    return Consumer<VideoPlayerController>(
+      builder: (context, ctrl, _) {
+        final entry = ctrl.current;
+        if (entry == null) return const Scaffold(backgroundColor: Colors.black, body: SizedBox());
+        final fav = VideoIndexService.isFavorite(entry.path);
+        return PopScope(
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) ctrl.minimize();
+          },
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            body: MouseRegion(
+              onHover: (_) => _resetHideTimer(),
+              child: GestureDetector(
+                onTap: _resetHideTimer,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (ctrl.audioOnly)
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.music_note, color: AppColors.accent, size: 64),
+                            const SizedBox(height: 16),
+                            Text(entry.name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+                            const Text('Audio Only', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                          ],
+                        ),
+                      )
+                    else
+                      Video(controller: ctrl.videoController, controls: NoVideoControls),
+                    AnimatedOpacity(
+                      opacity: _controlsVisible ? 1 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: IgnorePointer(
+                        ignoring: !_controlsVisible,
+                        child: _Controls(
+                          player: ctrl.player,
+                          title: entry.name,
+                          fav: fav,
+                          speed: _speed,
+                          audioOnly: ctrl.audioOnly,
+                          onBack: () => Navigator.of(context).pop(),
+                          onInfo: () => _showInfo(ctrl),
+                          onAudio: () => _pickAudioTrack(ctrl),
+                          onSubtitle: () => _pickSubtitleTrack(ctrl),
+                          onFav: () {
+                            VideoIndexService.toggleFavorite(entry.path);
+                            setState(() {});
+                          },
+                          onSpeed: (s) {
+                            ctrl.player.setRate(s);
+                            setState(() => _speed = s);
+                          },
+                          onToggleAudioOnly: () => ctrl.setAudioOnly(!ctrl.audioOnly),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -176,24 +185,28 @@ class _Controls extends StatelessWidget {
   final String title;
   final bool fav;
   final double speed;
+  final bool audioOnly;
   final VoidCallback onBack;
   final VoidCallback onInfo;
   final VoidCallback onAudio;
   final VoidCallback onSubtitle;
   final VoidCallback onFav;
   final void Function(double) onSpeed;
+  final VoidCallback onToggleAudioOnly;
 
   const _Controls({
     required this.player,
     required this.title,
     required this.fav,
     required this.speed,
+    required this.audioOnly,
     required this.onBack,
     required this.onInfo,
     required this.onAudio,
     required this.onSubtitle,
     required this.onFav,
     required this.onSpeed,
+    required this.onToggleAudioOnly,
   });
 
   @override
@@ -217,6 +230,11 @@ class _Controls extends StatelessWidget {
                   IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: onBack),
                   Expanded(child: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
                   IconButton(icon: Icon(fav ? Icons.star : Icons.star_border, color: AppColors.accent), onPressed: onFav),
+                  IconButton(
+                    icon: Icon(audioOnly ? Icons.videocam_outlined : Icons.music_note, color: Colors.white, size: 18),
+                    tooltip: audioOnly ? 'Switch to Video' : 'Audio Only',
+                    onPressed: onToggleAudioOnly,
+                  ),
                   IconButton(icon: const Icon(LucideIcons.music, color: Colors.white, size: 18), tooltip: 'Audio track', onPressed: onAudio),
                   IconButton(icon: const Icon(Icons.subtitles_outlined, color: Colors.white), tooltip: 'Subtitle', onPressed: onSubtitle),
                   PopupMenuButton<double>(
@@ -278,22 +296,7 @@ class _Controls extends StatelessWidget {
                               IconButton(icon: const Icon(Icons.forward_10, color: Colors.white), onPressed: () => player.seek(pos + const Duration(seconds: 10))),
                             ],
                           ),
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.volume_up, color: Colors.white, size: 20),
-                                onPressed: () {},
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.fullscreen, color: Colors.white),
-                                onPressed: () {
-                                  if (isDesktopPlatform) {
-                                    // handled by OS window manager; toggling handled elsewhere if needed
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
+                          const SizedBox(width: 40),
                         ],
                       ),
                     ),
@@ -307,5 +310,3 @@ class _Controls extends StatelessWidget {
     );
   }
 }
-
-bool get isDesktopPlatform => !kIsWeb && (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux || defaultTargetPlatform == TargetPlatform.macOS);
