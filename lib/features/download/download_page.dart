@@ -60,7 +60,7 @@ class _DownloadPageState extends State<DownloadPage> {
   static const _cards = [
     (_Os.windows, Icons.desktop_windows_outlined, 'Windows', '.exe installer'),
     (_Os.mac, Icons.laptop_mac_outlined, 'macOS', '.dmg installer'),
-    (_Os.android, Icons.android, 'Android', '.apk file'),
+    (_Os.android, Icons.android, 'Android', 'Get "...MostPhones.apk"'),
     (_Os.linux, Icons.terminal, 'Linux', '.AppImage / .deb'),
   ];
 
@@ -112,7 +112,7 @@ class _DownloadPageState extends State<DownloadPage> {
             children: _cards.map((c) => _DownloadCard(os: c.$1, icon: c.$2, label: c.$3, subtitle: c.$4, recommended: c.$1 == detected)).toList(),
           ),
           const SizedBox(height: 12),
-          const Text('Native Windows/macOS/Android/Linux installers below aren\'t built yet — those cards link to GitHub Releases, which is currently empty.', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+          const Text('Cards below open GitHub Releases — pick the file matching your device (e.g. Android: "...MostPhones.apk" for regular phones).', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
           const SizedBox(height: 24),
           const Text('All builds come from the same open-source code — nothing is uploaded, nothing tracked.', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
         ],

@@ -26,13 +26,19 @@ jobs:
       - run: flutter pub get
       - name: Build split-per-ABI APKs (smaller downloads than one universal APK)
         run: flutter build apk --release --split-per-abi
+      - name: Rename APKs so users can tell which one to install without guessing
+        run: |
+          cd build/app/outputs/flutter-apk
+          mv app-arm64-v8a-release.apk LOCORA-Player-Android-MostPhones.apk
+          mv app-armeabi-v7a-release.apk LOCORA-Player-Android-OldPhones32bit.apk
+          mv app-x86_64-release.apk LOCORA-Player-Android-EmulatorOnly.apk
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: |
-            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-            build/app/outputs/flutter-apk/app-x86_64-release.apk
+            build/app/outputs/flutter-apk/LOCORA-Player-Android-MostPhones.apk
+            build/app/outputs/flutter-apk/LOCORA-Player-Android-OldPhones32bit.apk
+            build/app/outputs/flutter-apk/LOCORA-Player-Android-EmulatorOnly.apk
 
   windows:
     runs-on: windows-latest
@@ -98,9 +104,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/android-apk/app-arm64-v8a-release.apk
-            artifacts/android-apk/app-armeabi-v7a-release.apk
-            artifacts/android-apk/app-x86_64-release.apk
+            artifacts/android-apk/LOCORA-Player-Android-MostPhones.apk
+            artifacts/android-apk/LOCORA-Player-Android-OldPhones32bit.apk
+            artifacts/android-apk/LOCORA-Player-Android-EmulatorOnly.apk
             artifacts/windows-zip/LOCORA-Player-windows.zip
             artifacts/linux-tar/LOCORA-Player-linux.tar.gz
             artifacts/macos-zip/LOCORA-Player-macos.zip
