@@ -24,11 +24,15 @@ jobs:
         with:
           channel: stable
       - run: flutter pub get
-      - run: flutter build apk --release
+      - name: Build split-per-ABI APKs (smaller downloads than one universal APK)
+        run: flutter build apk --release --split-per-abi
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
 
   windows:
     runs-on: windows-latest
@@ -94,7 +98,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/android-apk/app-release.apk
+            artifacts/android-apk/app-arm64-v8a-release.apk
+            artifacts/android-apk/app-armeabi-v7a-release.apk
+            artifacts/android-apk/app-x86_64-release.apk
             artifacts/windows-zip/LOCORA-Player-windows.zip
             artifacts/linux-tar/LOCORA-Player-linux.tar.gz
             artifacts/macos-zip/LOCORA-Player-macos.zip

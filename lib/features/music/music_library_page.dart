@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_theme.dart';
 import '../../core/file_scanner.dart';
 import 'music_index.dart';
 import 'music_models.dart';
@@ -22,7 +21,6 @@ class MusicLibraryPage extends StatefulWidget {
 class _MusicLibraryPageState extends State<MusicLibraryPage> {
   List<SongEntry> _all = [];
   bool _scanning = false;
-  bool _grid = true;
   _Tab _tab = _Tab.all;
   _SortBy _sort = _SortBy.name;
   String _query = '';
@@ -169,7 +167,6 @@ class _MusicLibraryPageState extends State<MusicLibraryPage> {
                 icon: _scanning ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(LucideIcons.refreshCw, size: 18),
                 onPressed: _scanning ? null : _rescan,
               ),
-              IconButton(icon: Icon(_grid ? LucideIcons.list : LucideIcons.layoutGrid, size: 18), onPressed: () => setState(() => _grid = !_grid)),
               PopupMenuButton<_SortBy>(
                 icon: const Icon(LucideIcons.arrowUpDown, size: 18),
                 onSelected: (v) => setState(() => _sort = v),
@@ -209,9 +206,7 @@ class _MusicLibraryPageState extends State<MusicLibraryPage> {
                   ? _GroupList(keys: _groupKeys, onOpen: (k) => setState(() => _drillKey = k))
                   : _filtered.isEmpty
                       ? const Center(child: Text('No songs found', style: TextStyle(color: AppColors.textMuted)))
-                      : _grid
-                          ? _SongGrid(items: _filtered, onOpen: _play)
-                          : _SongList(items: _filtered, onOpen: _play),
+                      : _SongList(items: _filtered, onOpen: _play),
         ),
       ],
     );
@@ -257,59 +252,6 @@ class _GroupList extends StatelessWidget {
   }
 }
 
-class _SongGrid extends StatelessWidget {
-  final List<SongEntry> items;
-  final void Function(SongEntry) onOpen;
-  const _SongGrid({required this.items, required this.onOpen});
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(20),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 180, mainAxisSpacing: 14, crossAxisSpacing: 14, childAspectRatio: 0.82),
-      itemCount: items.length,
-      itemBuilder: (context, i) {
-        final s = items[i];
-        final fav = MusicIndexService.isFavorite(s.path);
-        return InkWell(
-          borderRadius: BorderRadius.circular(AppTheme.radius),
-          onTap: () => onOpen(s),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppTheme.radius),
-                  child: Container(
-                    decoration: BoxDecoration(color: AppColors.card, border: Border.all(color: AppColors.border)),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        FutureBuilder<Uint8List?>(
-                          future: MusicIndexService.coverArt(s.path),
-                          builder: (context, snap) {
-                            if (snap.data != null) return Image.memory(snap.data!, fit: BoxFit.cover);
-                            return const Center(child: Icon(Icons.music_note, size: 30, color: AppColors.textMuted));
-                          },
-                        ),
-                        if (fav) const Positioned(top: 6, right: 6, child: Icon(Icons.favorite, size: 14, color: AppColors.accent)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(s.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-              Text(s.artist, style: const TextStyle(fontSize: 11, color: AppColors.textMuted), maxLines: 1, overflow: TextOverflow.ellipsis),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
 class _SongList extends StatelessWidget {
   final List<SongEntry> items;
   final void Function(SongEntry) onOpen;
@@ -325,7 +267,20 @@ class _SongList extends StatelessWidget {
         final fav = MusicIndexService.isFavorite(s.path);
         return ListTile(
           dense: true,
-          leading: const Icon(Icons.music_note, size: 18, color: AppColors.textSecondary),
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              width: 36,
+              height: 36,
+              child: FutureBuilder<Uint8List?>(
+                future: MusicIndexService.coverArt(s.path),
+                builder: (context, snap) {
+                  if (snap.data != null) return Image.memory(snap.data!, fit: BoxFit.cover);
+                  return Container(color: AppColors.card, child: const Icon(Icons.music_note, size: 16, color: AppColors.textSecondary));
+                },
+              ),
+            ),
+          ),
           title: Text(s.title, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis),
           subtitle: Text('${s.artist} · ${s.album} · ${humanDuration(s.duration)}', style: const TextStyle(fontSize: 11, color: AppColors.textMuted), overflow: TextOverflow.ellipsis),
           trailing: fav ? const Icon(Icons.favorite, size: 16, color: AppColors.accent) : null,

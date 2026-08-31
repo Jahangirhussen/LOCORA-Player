@@ -13,6 +13,12 @@ Future<void> ensureStoragePermission() async {
     Permission.audio,
     Permission.storage,
   ].request();
+  // Reading non-media files (PDFs, docs) via raw directory listing on
+  // Android 11+ needs All-Files access — READ_MEDIA_* alone only covers
+  // the media collections, not a generic recursive walk.
+  if (!await Permission.manageExternalStorage.isGranted) {
+    await Permission.manageExternalStorage.request();
+  }
 }
 
 /// Generic offline filesystem scanner shared by Video/Music/Images/PDF
@@ -36,6 +42,13 @@ Future<List<RawFileHit>> scanForExtensions(Set<String> extensions) async {
       for (var letter in 'CDEFGHIJ'.split('')) {
         final d = Directory('$letter:\\');
         if (await d.exists()) roots.add(d);
+      }
+    } else if (Platform.isAndroid) {
+      final shared = Directory('/storage/emulated/0');
+      if (await shared.exists()) {
+        roots.add(shared);
+      } else {
+        roots.add(Directory(Platform.environment['HOME'] ?? '/'));
       }
     } else {
       roots.add(Directory(Platform.environment['HOME'] ?? '/'));

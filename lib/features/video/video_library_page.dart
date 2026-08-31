@@ -215,8 +215,8 @@ class _VideoGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.all(20),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 220, mainAxisSpacing: 14, crossAxisSpacing: 14, childAspectRatio: 0.78),
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 160, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 1.05),
       itemCount: items.length,
       itemBuilder: (context, i) {
         final v = items[i];
@@ -226,10 +226,11 @@ class _VideoGrid extends StatelessWidget {
           onTap: () => onOpen(v),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
+              AspectRatio(
+                aspectRatio: 16 / 9,
                 child: Container(
-                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: AppColors.card,
                     borderRadius: BorderRadius.circular(AppTheme.radius),
@@ -237,16 +238,16 @@ class _VideoGrid extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      const Center(child: Icon(LucideIcons.clapperboard, size: 32, color: AppColors.textMuted)),
+                      const Center(child: Icon(LucideIcons.clapperboard, size: 24, color: AppColors.textMuted)),
                       if (fav)
-                        const Positioned(top: 6, right: 6, child: Icon(Icons.star, size: 16, color: AppColors.accent)),
+                        const Positioned(top: 5, right: 5, child: Icon(Icons.star, size: 14, color: AppColors.accent)),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
               Text(v.name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-              Text(humanSize(v.sizeBytes), style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              Text(humanSize(v.sizeBytes), style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
             ],
           ),
         );
